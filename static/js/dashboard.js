@@ -96,10 +96,11 @@ async function loadCampaigns() {
         if (!data.success) throw new Error(data.error || 'Load failed');
 
         // Auto-sync if today view returns no data (first visit / new day)
+        // Use sync/live to pull last 3 days so previous-day campaigns are also stored
         if ((!data.domains || !data.domains.length) && currentView === 'today' && !isSyncing) {
             isLoading = false;
             showLoading(false);
-            await syncCampaigns();
+            await syncLiveDays();
             return;
         }
 
@@ -123,12 +124,39 @@ async function syncCampaigns() {
 
         let url;
         if (currentView === 'today') {
-            url = '/api/sync/today';
+            url = '/api/sync/live';   // sync live days (today + 2 days back)
         } else {
             url = `/api/sync/range?startDate=${val('start-date')}&endDate=${val('end-date')}`;
         }
 
         const res  = await fetch(url, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.errors && data.errors.length) {
+            showError(data.errors.map(e => `${e.domain||''}: ${e.error||''}`).join(' | '));
+        }
+        if (!data.success && (!data.errors || !data.errors.length)) {
+            throw new Error(data.error || 'Sync failed');
+        }
+
+        await loadCampaigns();
+    } catch (err) {
+        showError(err.message);
+    } finally {
+        isSyncing = false;
+        setSyncing(false);
+    }
+}
+
+// ─── Sync live days (initial load / first visit) ────────────────
+async function syncLiveDays() {
+    if (isSyncing) return;
+    try {
+        isSyncing = true;
+        setSyncing(true);
+        hideError();
+
+        const res  = await fetch('/api/sync/live', { method: 'POST' });
         const data = await res.json();
 
         if (data.errors && data.errors.length) {

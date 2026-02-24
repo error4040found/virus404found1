@@ -11,7 +11,7 @@ TIMEZONE = "America/New_York"
 DB_PATH = os.path.join(os.path.dirname(__file__), "database", "campaigns.db")
 
 # Minimum sends threshold - campaigns below this are ignored
-MIN_SENDS = 50
+MIN_SENDS = 5
 
 # Number of "live" days (today + N days back) that always refresh from API
 LIVE_DAYS = 2
