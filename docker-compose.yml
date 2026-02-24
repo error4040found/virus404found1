@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  pinpointe-dashboard:
+    build: .
+    container_name: pinpointe-dashboard
+    ports:
+      - "8001:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./database:/app/database
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

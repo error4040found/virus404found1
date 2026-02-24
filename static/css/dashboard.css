@@ -1,0 +1,352 @@
+/* ================================================================
+   dashboard.css  –  Pinpointe Campaign Dashboard
+   Modern dark theme with glassmorphism accents
+   ================================================================ */
+
+/* ── Reset & Vars ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:        #0b0f19;
+  --surface:   #111827;
+  --card:      #1e293b;
+  --border:    #1e293b;
+  --text:      #e2e8f0;
+  --text-dim:  #94a3b8;
+  --accent:    #6366f1;
+  --accent2:   #8b5cf6;
+  --green:     #22c55e;
+  --yellow:    #eab308;
+  --red:       #ef4444;
+  --cyan:      #06b6d4;
+  --radius:    12px;
+  --radius-sm: 8px;
+  --shadow:    0 4px 24px rgba(0,0,0,.35);
+  --font:      'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html{font-size:14px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  line-height:1.6;
+  min-height:100vh;
+  padding:0 1rem 3rem;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 0;
+  border-bottom:1px solid var(--border);
+  margin-bottom:1.25rem;
+  position:sticky;top:0;z-index:50;
+  background:var(--bg);
+}
+.header-left{display:flex;align-items:center;gap:.75rem}
+.logo{flex-shrink:0}
+.header-title h1{font-size:1.35rem;font-weight:700;letter-spacing:-.02em}
+.timezone-label{font-size:.75rem;color:var(--text-dim)}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  border:none;cursor:pointer;font-family:var(--font);
+  font-weight:600;font-size:.8rem;
+  padding:.55rem 1.1rem;border-radius:var(--radius-sm);
+  transition:all .2s;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+}
+.btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.55;pointer-events:none}
+.btn-icon{width:16px;height:16px;flex-shrink:0}
+
+.btn-logout{
+  background:rgba(239,68,68,.12);
+  color:#fca5a5;
+  border:1px solid rgba(239,68,68,.2);
+  text-decoration:none;
+}
+.btn-logout:hover{
+  background:rgba(239,68,68,.25);
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.header-right{display:flex;align-items:center;gap:.6rem}
+
+/* spin animation for sync icon */
+.syncing .spin-target{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toolbar ──────────────────────────────────────────────────── */
+.toolbar{
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  margin-bottom:1.25rem;
+}
+.tab-group,.view-group{
+  display:flex;gap:0;
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:3px;
+}
+.tab,.view-btn{
+  padding:.45rem 1rem;border:none;background:transparent;
+  color:var(--text-dim);font-size:.8rem;font-weight:500;
+  cursor:pointer;border-radius:6px;transition:all .2s;
+  font-family:var(--font);
+}
+.tab:hover,.view-btn:hover{color:var(--text);background:var(--card)}
+.tab.active{background:var(--accent);color:#fff}
+.tab.active[data-report="seeds"]{background:var(--green);color:#fff}
+.view-btn.active{background:var(--card);color:var(--text)}
+
+.date-range{
+  display:flex;align-items:center;gap:.5rem;
+}
+.date-range label{font-size:.75rem;color:var(--text-dim);font-weight:500}
+.date-range input[type="date"]{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:.4rem .6rem;border-radius:6px;
+  font-family:var(--font);font-size:.8rem;
+  outline:none;transition:border .2s;
+}
+.date-range input[type="date"]:focus{border-color:var(--accent)}
+/* Fix date picker icon color in dark mode */
+.date-range input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7)}
+
+/* ── Grand Totals ─────────────────────────────────────────────── */
+.totals-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:.75rem;margin-bottom:1.5rem;
+}
+.metric-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:1.1rem 1.25rem;
+  border:1px solid var(--border);
+  transition:transform .2s, box-shadow .2s;
+}
+.metric-card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow);
+}
+.metric-label{
+  font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-dim);margin-bottom:.3rem;
+}
+.metric-value{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+.metric-sub{font-size:.72rem;color:var(--text-dim);margin-top:.15rem}
+
+.accent-open .metric-value{color:var(--green)}
+.accent-click .metric-value{color:var(--cyan)}
+.accent-visitors .metric-value{color:#a78bfa}
+.accent-leads .metric-value{color:#38bdf8}
+.accent-conv .metric-value{color:#8b5cf6}
+.accent-revenue .metric-value{color:#10b981}
+.accent-epc .metric-value{color:#f59e0b}
+.accent-ecpm .metric-value{color:#06b6d4}
+
+/* ── State messages ───────────────────────────────────────────── */
+.state-msg{
+  display:flex;align-items:center;justify-content:center;gap:.75rem;
+  padding:2.5rem 1rem;color:var(--text-dim);font-size:.9rem;
+}
+.state-msg.error{
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);
+  border-radius:var(--radius);color:#fca5a5;margin-bottom:1rem;
+  padding:1rem 1.25rem;justify-content:flex-start;
+  font-size:.82rem;
+}
+.empty-icon{font-size:1.6rem}
+
+/* spinner */
+.spinner{
+  width:24px;height:24px;
+  border:3px solid var(--border);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+/* ── Domain sections ──────────────────────────────────────────── */
+.campaigns-container{display:flex;flex-direction:column;gap:1rem}
+
+.domain-card{
+  background:var(--card);border-radius:var(--radius);
+  border:1px solid var(--border);overflow:hidden;
+  transition:box-shadow .2s;
+}
+.domain-card:hover{box-shadow:var(--shadow)}
+
+.domain-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.25rem;cursor:pointer;
+  transition:background .15s;
+  flex-wrap:wrap;gap:.5rem;
+}
+.domain-header:hover{background:rgba(255,255,255,.02)}
+
+.domain-title{display:flex;align-items:center;gap:.6rem}
+.domain-indicator{
+  font-size:.7rem;color:var(--text-dim);
+  transition:transform .25s;
+}
+.domain-card.collapsed .domain-indicator{transform:rotate(-90deg)}
+.domain-name{font-size:1rem;font-weight:700}
+.domain-count{
+  font-size:.7rem;color:var(--text-dim);
+  background:var(--surface);padding:2px 8px;border-radius:10px;
+}
+
+.domain-stats{display:flex;gap:1rem;flex-wrap:wrap}
+.domain-stat{font-size:.78rem;font-weight:500;color:var(--text-dim)}
+.domain-stat strong{color:var(--text);margin-right:3px}
+
+/* Campaign table */
+.campaign-table-wrap{
+  overflow-x:auto;
+  overflow-y:auto;
+  max-height:350px;
+  transition:max-height .3s ease;
+}
+.campaign-table-wrap::-webkit-scrollbar{width:6px;height:6px}
+.campaign-table-wrap::-webkit-scrollbar-track{background:var(--surface);border-radius:3px}
+.campaign-table-wrap::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+.campaign-table-wrap::-webkit-scrollbar-thumb:hover{background:var(--accent2)}
+.domain-card.collapsed .campaign-table-wrap{
+  max-height:0;overflow:hidden;
+}
+
+.campaign-table{
+  width:100%;border-collapse:collapse;font-size:.78rem;
+  table-layout:fixed;
+}
+.campaign-table thead{
+  background:var(--surface);
+  position:sticky;top:0;z-index:1;
+}
+.campaign-table th{
+  padding:.6rem .8rem;text-align:left;
+  font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--text-dim);font-size:.68rem;
+  border-bottom:1px solid var(--border);
+}
+.campaign-table th.col-num,
+.campaign-table th.col-pct{
+  text-align:right;
+}
+.campaign-table td{
+  padding:.55rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.campaign-table tbody tr{transition:background .12s}
+.campaign-table tbody tr:hover{background:rgba(255,255,255,.02)}
+
+/* Fixed column widths for consistent alignment */
+.col-date{width:10%;white-space:nowrap;color:var(--text-dim)}
+.col-name{width:13%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.col-num{width:5.5%;text-align:right;font-variant-numeric:tabular-nums}
+.col-pct{width:5.5%;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.col-money{width:6%;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.col-num-sm{width:4.5%;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Revenue value colours */
+.visitors-val{color:#a78bfa}
+.leads-val{color:#38bdf8}
+.conv-val{color:#8b5cf6}
+.revenue-val{color:#10b981}
+.epc-val{color:#f59e0b}
+.ecpm-val{color:#06b6d4}
+
+/* Domain header Leadpier stats */
+.visitors-stat{color:#a78bfa!important}
+.visitors-stat strong{color:#a78bfa!important}
+.leads-stat{color:#38bdf8!important}
+.leads-stat strong{color:#38bdf8!important}
+.conv-stat{color:#8b5cf6!important}
+.conv-stat strong{color:#8b5cf6!important}
+.revenue-stat{color:#10b981!important}
+.revenue-stat strong{color:#10b981!important}
+.epc-stat{color:#f59e0b!important}
+.epc-stat strong{color:#f59e0b!important}
+.ecpm-stat{color:#06b6d4!important}
+.ecpm-stat strong{color:#06b6d4!important}
+
+/* Money column header alignment */
+.campaign-table th.col-money,
+.campaign-table th.col-num-sm{
+  text-align:right;
+}
+
+/* Domains button in header */
+.btn-domains{
+  background:rgba(99,102,241,.12);
+  color:#a5b4fc;
+  border:1px solid rgba(99,102,241,.25);
+  text-decoration:none;
+}
+.btn-domains:hover{
+  background:rgba(99,102,241,.25);
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+/* ── Domain search ────────────────────────────────────────────── */
+.domain-search{
+  display:flex;align-items:center;gap:.5rem;
+}
+.domain-search input{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:.4rem .75rem;border-radius:6px;
+  font-family:var(--font);font-size:.8rem;
+  outline:none;transition:border .2s;
+  width:200px;
+}
+.domain-search input::placeholder{color:var(--text-dim)}
+.domain-search input:focus{border-color:var(--accent)}
+.domain-search label{font-size:.75rem;color:var(--text-dim);font-weight:500}
+
+/* ── Domain pagination ────────────────────────────────────────── */
+.domain-pagination{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  margin-top:1rem;padding:.75rem 0;
+}
+.domain-pagination .page-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:36px;height:36px;padding:0 .6rem;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text-dim);border-radius:var(--radius-sm);
+  font-family:var(--font);font-size:.8rem;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.domain-pagination .page-btn:hover{background:var(--surface);color:var(--text)}
+.domain-pagination .page-btn.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+.domain-pagination .page-btn:disabled{
+  opacity:.35;cursor:not-allowed;
+}
+.domain-pagination .page-info{
+  font-size:.78rem;color:var(--text-dim);margin:0 .25rem;
+}
+
+/* percentage colours (set via JS inline style) */
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media(max-width:768px){
+  body{padding:0 .5rem 2rem}
+  .header{flex-direction:column;align-items:flex-start;gap:.75rem}
+  .toolbar{flex-direction:column;align-items:flex-start}
+  .totals-grid{grid-template-columns:repeat(2,1fr)}
+  .domain-header{flex-direction:column;align-items:flex-start}
+  .domain-stats{margin-top:.4rem}
+  .domain-search input{width:160px}
+}
+@media(max-width:480px){
+  .totals-grid{grid-template-columns:1fr}
+}
