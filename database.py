@@ -735,6 +735,89 @@ def get_leadpier_last_sync(report_date: str) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Analytics — daily aggregated stats
+# ---------------------------------------------------------------------------
+def get_daily_aggregated_stats(
+    start: str, end: str, seed_only: bool = False
+) -> list[dict]:
+    """
+    Return campaign stats aggregated by date (for chart display).
+    Each row: {date, sends, opens, clicks, bounces, unsubs,
+               open_pct, click_pct}
+    """
+    from sqlalchemy import func
+
+    session = get_session()
+    try:
+        query = (
+            session.query(
+                Campaign.date,
+                func.sum(CampaignStat.sends).label("sends"),
+                func.sum(CampaignStat.opens).label("opens"),
+                func.sum(CampaignStat.clicks).label("clicks"),
+                func.sum(CampaignStat.bounces).label("bounces"),
+                func.sum(CampaignStat.unsubs).label("unsubs"),
+            )
+            .join(Campaign, Domain.id == Campaign.domain_id)
+            .outerjoin(CampaignStat, Campaign.id == CampaignStat.campaign_id)
+            .filter(Domain.enabled == 1)
+            .filter(Campaign.date.between(start, end))
+        )
+
+        if seed_only is True:
+            query = query.filter(Campaign.is_seed == 1)
+        elif seed_only is False:
+            query = query.filter((Campaign.is_seed == 0) | (Campaign.is_seed.is_(None)))
+
+        query = query.group_by(Campaign.date).order_by(Campaign.date)
+        # Need to select from Domain table
+        query = (
+            session.query(
+                Campaign.date,
+                func.sum(CampaignStat.sends).label("sends"),
+                func.sum(CampaignStat.opens).label("opens"),
+                func.sum(CampaignStat.clicks).label("clicks"),
+                func.sum(CampaignStat.bounces).label("bounces"),
+                func.sum(CampaignStat.unsubs).label("unsubs"),
+            )
+            .select_from(Domain)
+            .join(Campaign, Domain.id == Campaign.domain_id)
+            .outerjoin(CampaignStat, Campaign.id == CampaignStat.campaign_id)
+            .filter(Domain.enabled == 1)
+            .filter(Campaign.date.between(start, end))
+        )
+        if seed_only is True:
+            query = query.filter(Campaign.is_seed == 1)
+        elif seed_only is False:
+            query = query.filter((Campaign.is_seed == 0) | (Campaign.is_seed.is_(None)))
+        query = query.group_by(Campaign.date).order_by(Campaign.date)
+
+        rows = query.all()
+        result = []
+        for r in rows:
+            sends = int(r.sends or 0)
+            opens = int(r.opens or 0)
+            clicks = int(r.clicks or 0)
+            bounces = int(r.bounces or 0)
+            unsubs = int(r.unsubs or 0)
+            result.append(
+                {
+                    "date": r.date,
+                    "sends": sends,
+                    "opens": opens,
+                    "clicks": clicks,
+                    "bounces": bounces,
+                    "unsubs": unsubs,
+                    "open_pct": round((opens / sends) * 100, 2) if sends > 0 else 0,
+                    "click_pct": round((clicks / sends) * 100, 2) if sends > 0 else 0,
+                }
+            )
+        return result
+    finally:
+        session.close()
+
+
+# ---------------------------------------------------------------------------
 # Data cleanup — remove records older than N days
 # ---------------------------------------------------------------------------
 def cleanup_old_data(days: int = 30) -> dict[str, int]:

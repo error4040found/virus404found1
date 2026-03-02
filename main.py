@@ -45,6 +45,7 @@ from database import (
     update_domain,
     delete_domain,
     cleanup_old_data,
+    get_daily_aggregated_stats,
 )
 from sync_service import (
     sync_today,
@@ -377,6 +378,119 @@ async def api_sync_revenue(
 # ──────────────────────────────────────────────────────────────────────
 # API: Utility endpoints
 # ──────────────────────────────────────────────────────────────────────
+@app.get("/analytics", response_class=HTMLResponse)
+async def analytics_page(request: Request):
+    """Visual analytics page with charts."""
+    return templates.TemplateResponse(
+        "analytics.html",
+        {
+            "request": request,
+            "role": request.session.get("role", "user"),
+            "username": request.session.get("username", ""),
+        },
+    )
+
+
+@app.get("/api/analytics")
+async def api_analytics(
+    startDate: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    endDate: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$"),
+):
+    """Return aggregated analytics data for charts: daily breakdown, domain breakdown, totals."""
+    # Daily aggregation
+    daily_rows = get_daily_aggregated_stats(startDate, endDate)
+
+    # Load Leadpier revenue per date and merge into daily rows
+    from database import get_leadpier_sources_by_date
+    from datetime import timedelta as td
+
+    for row in daily_rows:
+        lp_sources = get_leadpier_sources_by_date(row["date"])
+        revenue = sum(float(s.get("totalRevenue", 0) or 0) for s in lp_sources)
+        visitors = sum(int(s.get("visitors", 0) or 0) for s in lp_sources)
+        total_leads = sum(int(s.get("totalLeads", 0) or 0) for s in lp_sources)
+        conversions = sum(int(s.get("soldLeads", 0) or 0) for s in lp_sources)
+        sends = row["sends"]
+        clicks = row["clicks"]
+        row["revenue"] = round(revenue, 2)
+        row["visitors"] = visitors
+        row["total_leads"] = total_leads
+        row["conversions"] = conversions
+        row["ecpm"] = (
+            round((revenue / sends) * 1000, 2) if sends > 0 and revenue > 0 else 0
+        )
+        row["epc"] = round(revenue / clicks, 2) if clicks > 0 and revenue > 0 else 0
+
+    # Domain breakdown — reuse existing grouped data
+    domain_groups = get_campaigns_grouped(startDate, endDate)
+    domain_summary = []
+    for dg in domain_groups:
+        t = dg["totals"]
+        domain_summary.append(
+            {
+                "name": dg["name"],
+                "code": dg["code"],
+                "sends": t["sends"],
+                "opens": t["opens"],
+                "clicks": t["clicks"],
+                "bounces": t["bounces"],
+                "unsubs": t["unsubs"],
+                "revenue": t["revenue"],
+                "conversions": t["conversions"],
+                "visitors": t["visitors"],
+                "total_leads": t["total_leads"],
+                "open_pct": t["open_percent"],
+                "click_pct": t["click_percent"],
+                "ecpm": t["ecpm"],
+                "epc": t["epc"],
+            }
+        )
+
+    # Grand totals
+    tot_sends = sum(d["sends"] for d in domain_summary)
+    tot_opens = sum(d["opens"] for d in domain_summary)
+    tot_clicks = sum(d["clicks"] for d in domain_summary)
+    tot_bounces = sum(d["bounces"] for d in domain_summary)
+    tot_unsubs = sum(d["unsubs"] for d in domain_summary)
+    tot_revenue = sum(d["revenue"] for d in domain_summary)
+    tot_conversions = sum(d["conversions"] for d in domain_summary)
+    tot_visitors = sum(d["visitors"] for d in domain_summary)
+    tot_total_leads = sum(d["total_leads"] for d in domain_summary)
+
+    totals = {
+        "sends": tot_sends,
+        "opens": tot_opens,
+        "clicks": tot_clicks,
+        "bounces": tot_bounces,
+        "unsubs": tot_unsubs,
+        "revenue": round(tot_revenue, 2),
+        "conversions": tot_conversions,
+        "visitors": tot_visitors,
+        "total_leads": tot_total_leads,
+        "open_pct": round((tot_opens / tot_sends) * 100, 2) if tot_sends > 0 else 0,
+        "click_pct": round((tot_clicks / tot_sends) * 100, 2) if tot_sends > 0 else 0,
+        "ecpm": (
+            round((tot_revenue / tot_sends) * 1000, 2)
+            if tot_sends > 0 and tot_revenue > 0
+            else 0
+        ),
+        "epc": (
+            round(tot_revenue / tot_clicks, 2)
+            if tot_clicks > 0 and tot_revenue > 0
+            else 0
+        ),
+    }
+
+    return {
+        "success": True,
+        "startDate": startDate,
+        "endDate": endDate,
+        "daily": daily_rows,
+        "domains": domain_summary,
+        "totals": totals,
+    }
+
+
 @app.get("/api/domains")
 async def api_domains():
     domains = get_all_domains()

@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visual Analytics — Pinpointe Dashboard</title>
+    <link rel="stylesheet" href="/static/css/analytics.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chart.js CDN (production build) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Trendline plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline@2.1.4/dist/chartjs-plugin-trendline.min.js"></script>
+  </head>
+  <body>
+    <!-- ─── Header ─── -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="url(#grad)" />
+            <path
+              d="M8 16L14 22L24 10"
+              stroke="white"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#6366f1" />
+                <stop offset="1" stop-color="#8b5cf6" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>Visual Analytics</h1>
+          <span class="timezone-label"
+            >EST &middot; Campaign Performance Charts</span
+          >
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="/" class="btn btn-back" title="Back to Dashboard">
+          <svg
+            class="btn-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span class="btn-label">Dashboard</span>
+        </a>
+        <button id="sync-btn" class="btn btn-primary">
+          <svg
+            class="btn-icon spin-target"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path
+              d="M14 8A6 6 0 1 1 8 2"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="btn-label">Sync &amp; Refresh</span>
+        </button>
+        <button class="btn btn-logout" title="Logout" onclick="confirmLogout()">
+          <svg
+            class="btn-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          <span class="btn-label">Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Controls ─── -->
+    <div class="controls-bar">
+      <div class="date-controls">
+        <label>From</label>
+        <input type="date" id="start-date" />
+        <label>To</label>
+        <input type="date" id="end-date" />
+        <button id="load-btn" class="btn btn-accent">Load Charts</button>
+      </div>
+      <div class="quick-ranges">
+        <button class="range-btn active" data-range="7">7 Days</button>
+        <button class="range-btn" data-range="14">14 Days</button>
+        <button class="range-btn" data-range="30">30 Days</button>
+      </div>
+    </div>
+
+    <!-- ─── KPI Summary Cards ─── -->
+    <section id="kpi-bar" class="kpi-bar" style="display: none">
+      <div class="kpi-card kpi-sends">
+        <div class="kpi-icon">📤</div>
+        <div class="kpi-data">
+          <div class="kpi-label">Total Sends</div>
+          <div class="kpi-value" id="kpi-sends">0</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-opens">
+        <div class="kpi-icon">📬</div>
+        <div class="kpi-data">
+          <div class="kpi-label">Unique Opens</div>
+          <div class="kpi-value" id="kpi-opens">0</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-open-rate">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-data">
+          <div class="kpi-label">Open Rate</div>
+          <div class="kpi-value" id="kpi-open-rate">0%</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-ctr">
+        <div class="kpi-icon">🖱️</div>
+        <div class="kpi-data">
+          <div class="kpi-label">CTR</div>
+          <div class="kpi-value" id="kpi-ctr">0%</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-clicks">
+        <div class="kpi-icon">🔗</div>
+        <div class="kpi-data">
+          <div class="kpi-label">Clicks</div>
+          <div class="kpi-value" id="kpi-clicks">0</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-unsubs">
+        <div class="kpi-icon">🚫</div>
+        <div class="kpi-data">
+          <div class="kpi-label">Unsubs</div>
+          <div class="kpi-value" id="kpi-unsubs">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Revenue KPI Cards ─── -->
+    <section id="revenue-bar" class="revenue-bar" style="display: none">
+      <div class="rev-card rev-le">
+        <div class="rev-icon">💰</div>
+        <div class="rev-data">
+          <div class="rev-label">LE Revenue</div>
+          <div class="rev-value" id="rev-le">$0.00</div>
+          <div class="rev-sub" id="rev-le-sales">0 sales</div>
+        </div>
+      </div>
+      <div class="rev-card rev-total">
+        <div class="rev-icon">💎</div>
+        <div class="rev-data">
+          <div class="rev-label">Total Revenue</div>
+          <div class="rev-value" id="rev-total">$0.00</div>
+          <div class="rev-sub">LE combined</div>
+        </div>
+      </div>
+      <div class="rev-card rev-sales">
+        <div class="rev-icon">🛒</div>
+        <div class="rev-data">
+          <div class="rev-label">Total Sales</div>
+          <div class="rev-value" id="rev-sales">0</div>
+          <div class="rev-sub">LE sales</div>
+        </div>
+      </div>
+      <div class="rev-card rev-ecpm">
+        <div class="rev-icon">📈</div>
+        <div class="rev-data">
+          <div class="rev-label">eCPM</div>
+          <div class="rev-value" id="rev-ecpm">$0.00</div>
+          <div class="rev-sub">Revenue / Sends × 1000</div>
+        </div>
+      </div>
+      <div class="rev-card rev-epc">
+        <div class="rev-icon">💵</div>
+        <div class="rev-data">
+          <div class="rev-label">EPC</div>
+          <div class="rev-value" id="rev-epc">$0.00</div>
+          <div class="rev-sub">Revenue / Clicks</div>
+        </div>
+      </div>
+      <div class="rev-card rev-visitors">
+        <div class="rev-icon">👥</div>
+        <div class="rev-data">
+          <div class="rev-label">Visitors</div>
+          <div class="rev-value" id="rev-visitors">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Loading / Error ─── -->
+    <div id="loading" class="state-msg" style="display: none">
+      <div class="spinner"></div>
+      <span>Loading analytics data&hellip;</span>
+    </div>
+    <div id="error-message" class="state-msg error" style="display: none"></div>
+
+    <!-- ─── Charts Section: Row 1 — Send Volume, Open & Click Rates, Revenue & eCPM ─── -->
+    <section id="charts-section" class="charts-section" style="display: none">
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">📤</span>
+            <h3>Send Volume</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-sends"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">📊</span>
+            <h3>Open &amp; Click Rates</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-rates"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">💰</span>
+            <h3>Revenue &amp; eCPM</h3>
+            <div class="chart-legend-inline">
+              <span class="leg-dot" style="background: #8b5cf6"></span> LE
+              Revenue
+              <span class="leg-dot" style="background: #06b6d4"></span> eCPM
+            </div>
+          </div>
+          <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Row 2 — Opens vs Clicks, Unsubs & Bounces, Sales -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">👁️</span>
+            <h3>Opens vs Clicks</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-opens-clicks"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">🚫</span>
+            <h3>Unsubs &amp; Bounces</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-unsubs-bounces"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">🛒</span>
+            <h3>Sales (LE)</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-sales"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Row 3 — Trend lines: Open% Trend, CTR% Trend, eCPM Trend -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">📈</span>
+            <h3>Open% Trend</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-open-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">🖱️</span>
+            <h3>CTR% Trend</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-ctr-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">💎</span>
+            <h3>eCPM Trend</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-ecpm-trend"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Row 4 — Domain Comparison: Open%, CTR%, eCPM by Domain -->
+      <h2 class="section-title">Domain Performance Comparison</h2>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">📊</span>
+            <h3>Open% vs Domain</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-domain-open"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">🖱️</span>
+            <h3>CTR% vs Domain</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-domain-ctr"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">💵</span>
+            <h3>eCPM vs Domain</h3>
+          </div>
+          <div class="chart-body"><canvas id="chart-domain-ecpm"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Row 5 — Domain Comparison: Revenue, Sends, Leads by Domain -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">💰</span>
+            <h3>Revenue vs Domain</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-domain-revenue"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">📤</span>
+            <h3>Send Volume vs Domain</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-domain-sends"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-icon">🛒</span>
+            <h3>Leads &amp; Sales vs Domain</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-domain-leads"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="/static/js/analytics.js"></script>
+
+    <!-- Logout confirmation -->
+    <div
+      id="logout-overlay"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+      "
+    >
+      <div
+        style="
+          background: #1e293b;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 12px;
+          max-width: 380px;
+          width: 90%;
+          padding: 0;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid #1e293b;
+          "
+        >
+          <h2
+            style="
+              font-size: 1.05rem;
+              font-weight: 700;
+              color: #e2e8f0;
+              margin: 0;
+            "
+          >
+            Confirm Logout
+          </h2>
+          <button
+            onclick="closeLogoutModal()"
+            style="
+              background: none;
+              border: none;
+              color: #94a3b8;
+              cursor: pointer;
+              font-size: 1.3rem;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <p
+          style="
+            padding: 1.25rem 1.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin: 0;
+          "
+        >
+          Are you sure you want to log out?
+        </p>
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #1e293b;
+          "
+        >
+          <button
+            onclick="closeLogoutModal()"
+            style="
+              padding: 0.5rem 1rem;
+              border-radius: 8px;
+              border: 1px solid #1e293b;
+              background: #111827;
+              color: #94a3b8;
+              cursor: pointer;
+              font-weight: 600;
+              font-size: 0.8rem;
+              font-family: inherit;
+            "
+          >
+            Cancel
+          </button>
+          <a
+            href="/logout"
+            style="
+              padding: 0.5rem 1rem;
+              border-radius: 8px;
+              border: 1px solid rgba(239, 68, 68, 0.3);
+              background: rgba(239, 68, 68, 0.15);
+              color: #fca5a5;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 0.8rem;
+              font-family: inherit;
+              display: inline-flex;
+              align-items: center;
+            "
+            >Logout</a
+          >
+        </div>
+      </div>
+    </div>
+    <script>
+      function confirmLogout() {
+        document.getElementById("logout-overlay").style.display = "flex";
+      }
+      function closeLogoutModal() {
+        document.getElementById("logout-overlay").style.display = "none";
+      }
+      document
+        .getElementById("logout-overlay")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeLogoutModal();
+        });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeLogoutModal();
+      });
+    </script>
+  </body>
+</html>

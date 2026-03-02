@@ -296,6 +296,19 @@ body{
   transform:translateY(-1px);
 }
 
+/* Visual Analytics button */
+.btn-visual{
+  background:rgba(168,85,247,.12);
+  color:#c4b5fd;
+  border:1px solid rgba(168,85,247,.25);
+  text-decoration:none;
+}
+.btn-visual:hover{
+  background:rgba(168,85,247,.25);
+  color:#fff;
+  transform:translateY(-1px);
+}
+
 /* ── Domain search ────────────────────────────────────────────── */
 .domain-search{
   display:flex;align-items:center;gap:.5rem;
