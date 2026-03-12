@@ -1,5 +1,5 @@
-"""
-config.py - Configuration for Pinpointe Email Campaign Dashboard
+﻿"""
+config.py - Configuration for Insight Bridge Email Campaign Dashboard
 """
 
 import os
@@ -37,7 +37,7 @@ LEADPIER_TOKEN_FILE = os.path.join(
 LEADPIER_TOKEN_EXPIRY_HOURS = 2
 LEADPIER_CACHE_MINUTES = 30  # Don't re-fetch revenue if synced < 30 min ago
 
-# Pinpointe API Domains Configuration
+# Insight Bridge API Domains Configuration
 DOMAINS = {
     "P3_CFL": {
         "name": "CapitalFastLane",

@@ -1,9 +1,9 @@
-version: '3.8'
+﻿version: '3.8'
 
 services:
-  pinpointe-dashboard:
+  insight-bridge-dashboard:
     build: .
-    container_name: pinpointe-dashboard
+    container_name: insight-bridge-dashboard
     ports:
       - "8001:8000"
     environment:

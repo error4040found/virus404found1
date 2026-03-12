@@ -1,5 +1,5 @@
-"""
-main.py - FastAPI application for Pinpointe Email Campaign Dashboard
+﻿"""
+main.py - FastAPI application for Insight Bridge Email Campaign Dashboard
 
 Endpoints:
   GET  /login               → Login page
@@ -10,7 +10,7 @@ Endpoints:
   GET  /api/range           → Campaigns for date range + revenue
   GET  /api/seeds/today     → Today's seed campaigns + revenue
   GET  /api/seeds/range     → Seed campaigns for date range + revenue
-  POST /api/sync/today      → Sync today from Pinpointe + Leadpier
+  POST /api/sync/today      → Sync today from Insight Bridge + Leadpier
   POST /api/sync/range      → Sync date range
   POST /api/sync/live       → Sync live days (T, T-1, T-2)
   POST /api/sync/revenue    → Sync Leadpier revenue only
@@ -115,7 +115,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Pinpointe Campaign Dashboard",
+    title="Insight Bridge Campaign Dashboard",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -290,7 +290,7 @@ async def api_seeds_range(
 
 
 # ──────────────────────────────────────────────────────────────────────
-# API: Sync endpoints (hit Pinpointe API → write to DB)
+# API: Sync endpoints (hit Insight Bridge API → write to DB)
 # ──────────────────────────────────────────────────────────────────────
 @app.post("/api/sync/today")
 async def api_sync_today():
@@ -362,7 +362,7 @@ async def api_sync_live():
 async def api_sync_revenue(
     date: str = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
-    """Sync Leadpier revenue data only (no Pinpointe sync)."""
+    """Sync Leadpier revenue data only (no Insight Bridge sync)."""
     try:
         if not date:
             date = datetime.now(pytz.timezone(TIMEZONE)).strftime("%Y-%m-%d")
@@ -620,7 +620,7 @@ async def api_cleanup():
         )
 
 
-@app.get("/api/debug/test-pinpointe")
+@app.get("/api/debug/test-insight-bridge")
 async def api_debug_test():
     """Quick diagnostic: call GetNewslettersSent for first domain and report."""
     from pinpoint_api import PinpointAPI

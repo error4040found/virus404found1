@@ -1,5 +1,5 @@
-/* ================================================================
-   dashboard.js  –  Pinpointe Campaign Dashboard (FastAPI frontend)
+﻿/* ================================================================
+   dashboard.js  –  Insight Bridge Campaign Dashboard (FastAPI frontend)
    ================================================================ */
 
 let currentView   = 'today';   // 'today' | 'range'
@@ -114,7 +114,7 @@ async function loadCampaigns() {
     }
 }
 
-// ─── Sync from Pinpointe API ────────────────────────────────────
+// ─── Sync from Insight Bridge API ────────────────────────────────────
 async function syncCampaigns() {
     if (isSyncing) return;
     try {

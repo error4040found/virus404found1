@@ -1,12 +1,12 @@
-"""
-pinpoint_api.py - Pinpointe XML API client (Python port)
+﻿"""
+pinpoint_api.py - Insight Bridge XML API client (Python port)
 
 Mirrors the PHP PinpointAPI class logic:
   STEP 1: GetNewslettersSent   → list campaigns in a time window
   STEP 2: GetNewsletterSummary → detailed stats per campaign (by statid)
 
 Uses regex-based XML parsing (same approach as PHP version) because
-Pinpointe responses sometimes have inconsistent nesting that breaks
+Insight Bridge responses sometimes have inconsistent nesting that breaks
 standard XML parsers.
 
 Performance: Uses asyncio.Semaphore to fetch up to MAX_CONCURRENT
@@ -34,13 +34,13 @@ MAX_CONCURRENT = 10
 
 
 class PinpointAPIError(Exception):
-    """Raised when the Pinpointe API returns an error."""
+    """Raised when the Insight Bridge API returns an error."""
 
     pass
 
 
 class PinpointAPI:
-    """Async client for the Pinpointe XML API."""
+    """Async client for the Insight Bridge XML API."""
 
     def __init__(self, timeout: int = 120):
         self.timeout = timeout
@@ -73,7 +73,7 @@ class PinpointAPI:
         return "".join(parts)
 
     # ------------------------------------------------------------------
-    # POST XML to Pinpointe, return raw response text
+    # POST XML to Insight Bridge, return raw response text
     # Accepts an optional shared httpx.AsyncClient to avoid creating
     # a new connection per request (much faster for batch calls).
     # ------------------------------------------------------------------
@@ -102,11 +102,11 @@ class PinpointAPI:
 
         if response.status_code != 200:
             logger.error(
-                "HTTP %d from Pinpointe: %s",
+                "HTTP %d from Insight Bridge: %s",
                 response.status_code,
                 response.text[:500],
             )
-            raise PinpointAPIError(f"HTTP {response.status_code} from Pinpointe")
+            raise PinpointAPIError(f"HTTP {response.status_code} from Insight Bridge")
 
         logger.debug("Response length: %d chars", len(response.text))
         return response.text
@@ -312,7 +312,7 @@ class PinpointAPI:
         return results
 
     # ------------------------------------------------------------------
-    # Parse Pinpointe starttime string → (date, time) in local tz
+    # Parse Insight Bridge starttime string → (date, time) in local tz
     # Handles ISO 8601, Unix timestamps, and various date formats
     # ------------------------------------------------------------------
     @staticmethod

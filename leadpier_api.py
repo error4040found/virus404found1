@@ -1,9 +1,9 @@
-"""
+﻿"""
 leadpier_api.py - Leadpier Revenue API client
 
 Authenticates with webapi.leadpier.com and fetches source-level
 revenue statistics.  The matching logic maps Leadpier source names
-(e.g. "mta-b_0216-cfl-e3") to Pinpointe campaign names ("0216-cfl-e3").
+(e.g. "mta-b_0216-cfl-e3") to Insight Bridge campaign names ("0216-cfl-e3").
 
 Ported from:
   - new_project/login_request.py  (auth flow)
@@ -190,7 +190,7 @@ class LeadpierAPI:
         sources: list[dict], campaign_name: str
     ) -> dict[str, Any] | None:
         """
-        Match Leadpier source records to a Pinpointe campaign name.
+        Match Leadpier source records to a Insight Bridge campaign name.
 
         Matching rules (all case-insensitive):
           1. Exact match:  source == campaign_name

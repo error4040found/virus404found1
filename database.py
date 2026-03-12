@@ -1,8 +1,8 @@
-"""
+﻿"""
 database.py - SQLAlchemy ORM database layer for campaign data.
 
 Models:
-  Domain          — Pinpointe account credentials
+  Domain          — Insight Bridge account credentials
   Campaign        — Individual email campaigns (keyed by domain_id + statid)
   CampaignStat    — Latest performance stats for each campaign
   LeadpierSource  — Cached Leadpier revenue data per source per date

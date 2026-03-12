@@ -1,8 +1,8 @@
-"""
+﻿"""
 sync_service.py - Orchestration layer between PinpointAPI and Database.
 
 Caching strategy (same as PHP version):
-  T, T-1, T-2  → Always refresh from Pinpointe API
+  T, T-1, T-2  → Always refresh from Insight Bridge API
   Older         → Serve from DB; if missing, fetch once then cache forever
 
 Filtering:
